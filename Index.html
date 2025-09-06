@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="manifest" href="manifest.json" />
+<title>⚡App Demonstração</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* Tela de abertura */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #111827; /* fundo escuro */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Logo */
+#splash img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 4px solid #FFD700;
+  margin-bottom: 20px;
+}
+
+/* Barra de carregamento */
+.loader-bar {
+  width: 200px;
+  height: 8px;
+  background: #333;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.loader-fill {
+  height: 100%;
+  width: 0%;
+  background: #FFD700;
+  border-radius: 999px;
+  animation: loadFill 3s linear forwards;
+}
+@keyframes loadFill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 3px; }
+::-webkit-scrollbar-track { background: #1F2937; }
+.product-card { background: #1F2937; border-radius: 1rem; padding: 1rem; text-align: center; transition: transform 0.2s; display:flex; flex-direction:column; justify-content:start; }
+.product-card img { width:100%; height:200px; object-fit:cover; border-radius:0.75rem; margin-bottom:0.5rem; }
+.product-card:hover { transform: scale(1.03); }
+.cart-panel { position: fixed; top: 0; right: 0; height: 100%; width: 90%; max-width: 400px; background: #111827; z-index: 50; padding: 1rem; transform: translateX(100%); transition: transform 0.3s; overflow-y: auto; }
+.cart-panel.show { transform: translateX(0); }
+.btn { cursor: pointer; transition: transform 0.2s; }
+.btn:hover { transform: scale(1.05); }
+.category-filter { display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem; }
+.category-filter button { flex-shrink:0; white-space:nowrap; background:#FFD700; color:black; px-3 py-1 rounded font-semibold; cursor:pointer; transition:0.2s; border-radius: 5px; width: 150px; }
+.category-filter button.active { background:#FACC15; }
+.toast { position: fixed; top: 1rem; right: 1rem; background: #FFD700; color: black; padding: 0.5rem 1rem; border-radius: 0.5rem; z-index: 100; opacity:0; transition: opacity 0.3s; }
+.toast.show { opacity:1; }
+</style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+<!-- HEADER COM FUNDO E LOGO -->
+  <!-- Logo redonda -->
+  <div class="absolute top-4 flex justify-center w-full">
+    <img src="logo.jpeg" alt="Logo" class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-lg">
+  </div>
+  <!-- Tela de abertura -->
+<div id="splash">
+  <img class="logo" src="logo.jpeg" alt="Logo">
+  <h1>
+  	Aplicativo Demonstração 
+  </h1>
+ <br>
+  <div class="loader-bar">
+    <div class="loader-fill"></div>
+  </div>
+  <h3>
+  	www.atecseven.com.br
+  </h3>
+</div>
+
+  <!-- Título -->
+  <h1 class="text-yellow-400 text-3xl font-bold mt-28 text-center">🍔App Demonstração⚡</h1>
+</header>
+
+<div class="max-w-5xl mx-auto p-4">
+
+  <!-- BUSCA -->
+  <input id="searchInput" placeholder="Buscar produtos..." class="w-full p-3 mb-2 rounded bg-gray-700 border border-gray-600"/>
+
+  <!-- FILTRO DE CATEGORIAS -->
+  <div id="categoryFilter" class="category-filter mb-4"></div>
+
+  <!-- PRODUTOS -->
+  <div id="productList" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"></div>
+
+  <!-- BOTÃO ABRIR CARRINHO COM TOTAL DE ITENS -->
+  <button id="btnToggleCart" class="fixed bottom-4 right-4 bg-yellow-400 text-black px-4 py-3 rounded-full font-bold shadow-lg btn z-50">
+    🛒 Carrinho <span id="cartCount" class="bg-red-600 text-white px-2 py-0.5 rounded-full ml-1 text-sm">0</span>
+  </button>
+
+  <!-- PAINEL DO CARRINHO -->
+  <div id="cartPanel" class="cart-panel">
+    <h2 class="text-xl font-bold mb-2">🛒 Carrinho</h2>
+    <div id="cartList" class="mb-4"></div>
+    <div class="mb-4">
+      <label class="block mb-1">Nome</label>
+      <input id="customerName" class="w-full p-2 rounded bg-gray-700 border border-gray-600"/>
+      <label class="block mt-2 mb-1">WhatsApp</label>
+      <input id="customerWhats" class="w-full p-2 rounded bg-gray-700 border border-gray-600"/>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Entrega ou Retirada?</label>
+      <select id="deliveryType" class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+        <option value="entrega">Entrega (+R$10)</option>
+        <option value="retirada">Retirada</option>
+      </select>
+    </div>
+    <div id="addressDiv" class="mb-4">
+      <label class="block mb-1">Endereço</label>
+      <input id="address" class="w-full p-2 rounded bg-gray-700 border border-gray-600"/>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-1">Forma de pagamento</label>
+      <select id="paymentMethod" class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+        <option value="pix">Pix</option>
+        <option value="dinheiro">Dinheiro</option>
+        <option value="credito">Cartão de Crédito (sujeito a taxa)</option>
+        <option value="debito">Cartão de Débito (sujeito a taxa)</option>
+      </select>
+    </div>
+    <div class="flex justify-between items-center mb-4">
+      <div class="text-yellow-400 font-bold text-xl">Total: <span id="totalPrice">R$0,00</span></div>
+      <button id="btnPlaceOrder" class="bg-yellow-400 text-black px-4 py-2 rounded font-semibold btn">✅ Finalizar</button>
+    </div>
+    <div id="pixMessage" class="hidden mb-4 p-3 rounded bg-green-700 text-black">
+      Após confirmar o pedido, envie o comprovante via WhatsApp clicando no botão abaixo.
+      <a id="pixWhatsBtn" href="#" target="_blank" class="block mt-2 bg-yellow-400 text-black px-4 py-2 rounded text-center btn">Enviar Comprovante</a>
+    </div>
+    <button id="btnCloseCart" class="w-full bg-gray-700 text-white py-2 rounded btn">Fechar</button>
+  </div>
+
+  <!-- ÚLTIMOS PEDIDOS -->
+  <h2 class="text-xl font-bold mt-6 mb-2">📦 Últimos Pedidos</h2>
+  <div id="lastOrders"></div>
+</div>
+
+<!-- MENSAGEM PÓS-PEDIDO -->
+<div id="orderComplete" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col justify-center items-center text-center p-4 hidden z-50 text-gray-100">
+  <h2 class="text-3xl font-bold mb-4">🎉 Obrigado pelo seu pedido!</h2>
+  <p class="mb-4">Já estamos preparando seu pedido. Quando ele sair para entrega, avisaremos no WhatsApp informado.</p>
+  <button id="contactStore" class="bg-yellow-400 text-black px-4 py-2 rounded font-semibold btn mb-4">Entrar em contato com a loja</button>
+  <div id="orderTimer" class="bg-gray-800 p-3 rounded">Tempo desde o pedido: <span id="timer">00:00:00</span></div>
+  <button id="btnReceived" class="mt-4 bg-green-600 text-white px-4 py-2 rounded btn">Recebi meu pedido</button>
+</div>
+
+<div id="toastContainer"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+import { getDatabase, ref, onValue, push, update } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBzK6HfalJpnGaGFZptwJUfIkpugvevHNs",
+  authDomain: "delivery-demo-54f9c.firebaseapp.com",
+  databaseURL: "https://delivery-demo-54f9c-default-rtdb.firebaseio.com",
+  projectId: "delivery-demo-54f9c",
+  storageBucket: "delivery-demo-54f9c.firebasestorage.app",
+  messagingSenderId: "77029251394",
+  appId: "1:77029251394:web:5a4eca50ff529b96f710db"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+const brl = v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+let PRODUCTS = [], CART = JSON.parse(localStorage.getItem('cart')) || [], LAST_ORDERS = JSON.parse(localStorage.getItem('lastOrders')) || [];
+let ORDER_COMPLETE = JSON.parse(localStorage.getItem('orderComplete')) || null;
+let ORDER_START_TIME = localStorage.getItem('orderStartTime') || null;
+
+const productListEl = $('#productList');
+const cartListEl = $('#cartList');
+const totalPriceEl = $('#totalPrice');
+const searchInput = $('#searchInput');
+const deliveryTypeSelect = $('#deliveryType');
+const addressDiv = $('#addressDiv');
+const addressInput = $('#address');
+const customerName = $('#customerName');
+const customerWhats = $('#customerWhats');
+const paymentMethod = $('#paymentMethod');
+const btnPlaceOrder = $('#btnPlaceOrder');
+const lastOrdersEl = $('#lastOrders');
+const cartPanel = $('#cartPanel');
+const btnToggleCart = $('#btnToggleCart');
+const btnCloseCart = $('#btnCloseCart');
+const pixMessage = $('#pixMessage');
+const pixWhatsBtn = $('#pixWhatsBtn');
+const categoryFilterEl = $('#categoryFilter');
+const toastContainer = $('#toastContainer');
+const cartCountEl = $('#cartCount');
+
+const orderCompleteEl = $('#orderComplete');
+const contactStoreBtn = $('#contactStore');
+const orderTimerEl = $('#timer');
+const btnReceived = $('#btnReceived');
+
+// --- Funções ---
+function showToast(msg){
+  const div=document.createElement('div');
+  div.className='toast show';
+  div.textContent=msg;
+  toastContainer.appendChild(div);
+  setTimeout(()=> div.remove(),2500);
+}
+
+function updateCartCount(){
+  const totalItems = CART.reduce((sum,c)=>sum+c.qtd,0);
+  cartCountEl.textContent = totalItems;
+}
+
+// --- Carregar produtos ---
+onValue(ref(db,'produtos'), snap=>{
+  PRODUCTS=[];
+  snap.forEach(ch=>{
+    const p = ch.val();
+    if(!p.inativo) PRODUCTS.push({id: ch.key, ...p});
+  });
+  renderCategoryFilter();
+  renderProductList();
+});
+
+// --- Render categoria ---
+let activeCategory='';
+function renderCategoryFilter(){
+  const categorias = Array.from(new Set(PRODUCTS.map(p=>p.categoria).filter(Boolean))).sort();
+  categoryFilterEl.innerHTML='';
+  categorias.forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.textContent=cat;
+    btn.onclick=()=>{
+      activeCategory=(activeCategory===cat?'':cat);
+      $$('.category-filter button').forEach(b=>b.classList.remove('active'));
+      if(activeCategory) btn.classList.add('active');
+      renderProductList();
+    };
+    categoryFilterEl.appendChild(btn);
+  });
+}
+
+function renderProductList(){
+  const term = searchInput.value.toLowerCase();
+  productListEl.innerHTML='';
+  PRODUCTS.filter(p=>{
+    const textMatch=`${p.nome} ${p.descricao} ${p.categoria||''}`.toLowerCase().includes(term);
+    const catMatch = activeCategory? p.categoria===activeCategory : true;
+    return textMatch && catMatch;
+  }).forEach(p=>{
+    const div=document.createElement('div');
+    div.className='product-card relative';
+
+    const promoBadge = p.promocional ? `<div class="absolute top-2 left-2 bg-gradient-to-r from-green-400 to-red-500 text-white font-bold text-xs px-2 py-1 rounded shadow-lg">ITEM PROMOCIONAL</div>` : '';
+
+    div.innerHTML=`
+      ${promoBadge}
+      <img src="${p.imagem||''}" alt="${p.nome}"/>
+      <div class="font-bold text-lg mb-1">${p.nome}</div>
+      <div class="text-xs text-gray-400 mb-1">${p.categoria||''}</div>
+      <div class="text-sm text-gray-300 mb-2">${p.descricao||''}</div>
+      <div class="text-yellow-400 font-bold mb-2">${brl(p.preco)}</div>
+      <div class="flex items-center justify-center gap-2">
+        <label>Qtd:</label>
+        <input type="number" min="1" value="1" class="w-12 text-black rounded px-1 qtyInput"/>
+      </div>
+      <button class="bg-yellow-400 text-black px-3 py-1 rounded mt-2 btn addBtn">Adicionar</button>
+    `;
+    productListEl.appendChild(div);
+
+    const qtyInput = div.querySelector('.qtyInput');
+    div.querySelector('.addBtn').onclick=()=>{
+      const qty = parseInt(qtyInput.value)||1;
+      const idx = CART.findIndex(c=>c.id===p.id);
+      if(idx>-1){ CART[idx].qtd += qty; } else { CART.push({id:p.id,nome:p.nome,preco:p.preco,qtd:qty}); }
+      localStorage.setItem('cart',JSON.stringify(CART));
+      renderCart();
+      showToast(`${p.nome} adicionado ao carrinho!`);
+    };
+  });
+}
+
+// --- Render carrinho ---
+function renderCart(){
+  cartListEl.innerHTML='';
+  let total=0;
+  CART.forEach((c,i)=>{
+    total += c.preco*c.qtd;
+    const div=document.createElement('div');
+    div.className='bg-gray-800 p-2 rounded mb-2 flex justify-between items-center';
+    div.innerHTML=`
+      <div>
+        <div class="font-bold">${c.nome}</div>
+        <div>${brl(c.preco)} x ${c.qtd} = ${brl(c.preco*c.qtd)}</div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <input type="number" min="1" value="${c.qtd}" class="w-16 text-black rounded px-1 qtyCart"/>
+        <button class="bg-red-600 text-white px-2 py-1 rounded btn removeBtn">Remover</button>
+      </div>
+    `;
+    cartListEl.appendChild(div);
+
+    const qtyCart = div.querySelector('.qtyCart');
+    qtyCart.onchange=()=>{
+      const val = parseInt(qtyCart.value)||1;
+      CART[i].qtd = val;
+      localStorage.setItem('cart',JSON.stringify(CART));
+      renderCart();
+      showToast(`Quantidade de ${c.nome} atualizada!`);
+    };
+
+    div.querySelector('.removeBtn').onclick=()=>{
+      CART.splice(i,1);
+      localStorage.setItem('cart',JSON.stringify(CART));
+      renderCart();
+      showToast(`${c.nome} removido do carrinho!`);
+    };
+  });
+  if(deliveryTypeSelect.value==='entrega') total+=10;
+  totalPriceEl.textContent = brl(total);
+  updateCartCount();
+}
+
+// --- Delivery toggle ---
+deliveryTypeSelect.onchange=()=>{ addressDiv.style.display = deliveryTypeSelect.value==='entrega'?'block':'none'; };
+
+// --- Abrir/fechar carrinho ---
+btnToggleCart.onclick=()=> cartPanel.classList.add('show');
+btnCloseCart.onclick=()=> cartPanel.classList.remove('show');
+document.addEventListener('click', e=>{ if(!cartPanel.contains(e.target)&&!btnToggleCart.contains(e.target)) cartPanel.classList.remove('show'); });
+
+// --- Finalizar pedido ---
+btnPlaceOrder.onclick = () => {
+  if (CART.length === 0) return showToast('Adicione pelo menos um produto ao carrinho!');
+  if (!customerName.value || !customerWhats.value) return showToast('Preencha nome e WhatsApp!');
+  if (deliveryTypeSelect.value === 'entrega' && !addressInput.value) return showToast('Informe o endereço!');
+
+  let troco = null;
+  if (paymentMethod.value === 'dinheiro') {
+    const trocoInput = prompt('Para quanto deseja o troco?');
+    if (!trocoInput || isNaN(Number(trocoInput))) return showToast('Informe um valor válido para o troco!');
+    troco = `Troco para: ${Number(trocoInput).toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}`;
+  }
+
+  const total = parseFloat(CART.reduce((sum, c) => sum + c.preco * c.qtd, 0)) + (deliveryTypeSelect.value === 'entrega' ? 10 : 0);
+
+  // --- Número do pedido aleatório 9 dígitos ---
+  const numeroPedido = Math.floor(Math.random()*900000000) + 100000000;
+
+  const order = {
+    numero: numeroPedido,
+    cliente: customerName.value,
+    telefone: customerWhats.value,
+    delivery: deliveryTypeSelect.value,
+    address: addressInput.value,
+    payment: paymentMethod.value,
+    troco: troco,
+    total,
+    itens: CART.map(c => ({ ...c })),
+    status: 'Preparando',
+    createdAt: new Date().toISOString()
+  };
+
+  push(ref(db, 'pedidos'), order)
+    .then((res) => {
+      order.firebaseKey = res.key; // salva a chave para futuras atualizações
+      showToast('Pedido registrado com sucesso!');
+
+      LAST_ORDERS.unshift(order);
+      if (LAST_ORDERS.length > 5) LAST_ORDERS.pop();
+      localStorage.setItem('lastOrders', JSON.stringify(LAST_ORDERS));
+
+      ORDER_COMPLETE = order;
+      ORDER_START_TIME = Date.now();
+      localStorage.setItem('orderComplete', JSON.stringify(ORDER_COMPLETE));
+      localStorage.setItem('orderStartTime', ORDER_START_TIME);
+
+      localStorage.removeItem('cart');
+      CART = [];
+      renderCart();
+      renderLastOrders();
+
+      showOrderComplete();
+    })
+    .catch(err => {
+      showToast('Erro ao registrar pedido!');
+      console.error(err);
+    });
+};
+
+// --- Últimos pedidos ---
+function renderLastOrders(){
+  lastOrdersEl.innerHTML='';
+  LAST_ORDERS.forEach(o=>{
+    const div=document.createElement('div');
+    div.className='bg-gray-800 p-2 rounded mb-2';
+    div.innerHTML=`
+      <div class="flex justify-between">
+        <div class="font-bold">${o.cliente}</div>
+        <div>${brl(o.total)}</div>
+      </div>
+      <div class="text-xs text-gray-400">${o.status}</div>
+    `;
+    lastOrdersEl.appendChild(div);
+  });
+}
+
+// --- Tela pedido concluído ---
+function showOrderComplete(){
+  orderCompleteEl.classList.remove('hidden');
+  updateOrderTimer();
+}
+
+function updateOrderTimer(){
+  if(!ORDER_START_TIME) return;
+  const diff = Date.now() - ORDER_START_TIME;
+  const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+  const m = Math.floor(diff/60000)%60 .toString().padStart(2,'0');
+  const s = Math.floor(diff/1000)%60 .toString().padStart(2,'0');
+  orderTimerEl.textContent = `${h}:${m}:${s}`;
+  setTimeout(updateOrderTimer,1000);
+}
+
+// --- Contato loja ---
+contactStoreBtn.onclick=()=>{ window.open(`https://wa.me/55${ORDER_COMPLETE.telefone}?text=Olá!`, '_blank'); };
+
+// --- Confirmar recebimento e atualizar status ---
+btnReceived.addEventListener('click', () => {
+  if (!ORDER_COMPLETE || !ORDER_COMPLETE.firebaseKey) return;
+  const pedidoRef = ref(db, 'pedidos/' + ORDER_COMPLETE.firebaseKey);
+  update(pedidoRef, { status: 'Finalizado' })
+    .then(() => {
+      ORDER_COMPLETE.status = 'Finalizado';
+      localStorage.setItem('orderComplete', JSON.stringify(ORDER_COMPLETE));
+
+      const idx = LAST_ORDERS.findIndex(o=>o.numero===ORDER_COMPLETE.numero);
+      if(idx>-1){
+        LAST_ORDERS[idx].status = 'Finalizado';
+        localStorage.setItem('lastOrders', JSON.stringify(LAST_ORDERS));
+        renderLastOrders();
+      }
+
+      // Somente aqui a tela some
+      ORDER_COMPLETE = null;
+      ORDER_START_TIME = null;
+      localStorage.removeItem('orderComplete');
+      localStorage.removeItem('orderStartTime');
+      orderCompleteEl.classList.add('hidden');
+
+      showToast(`Pedido finalizado com sucesso!`);
+    })
+    .catch(err=>{
+      console.error(err);
+      showToast('Erro ao atualizar status!');
+    });
+});
+
+// --- Inicialização ---
+renderCart();
+renderLastOrders();
+if(ORDER_COMPLETE) showOrderComplete();
+
+// --- Splash Screen ---
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+  }, 3000); // 3 segundos
+});
+
+</script>
+<script>
+  let deferredPrompt;
+  const installPrompt = document.getElementById('installPrompt');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // Impede que o navegador exiba o banner automático
+    deferredPrompt = e;
+
+    // Mostrar o botão de instalação customizado
+    installPrompt.style.display = 'block';
+  });
+
+  installPrompt.addEventListener('click', async () => {
+    installPrompt.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('Usuário aceitou instalar');
+      } else {
+        console.log('Usuário recusou instalar');
+      }
+      deferredPrompt = null;
+    }
+  });
+
+  // Esconde o botão se o app já estiver instalado
+  window.addEventListener('appinstalled', () => {
+    console.log('App instalado');
+    installPrompt.style.display = 'none';
+  });
+</script>
+</body>
+</html>
