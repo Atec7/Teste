@@ -1,6 +1,6 @@
 {
-  "name": "Agendar",
-  "short_name": "Agendar",
+  "name": "Delivery",
+  "short_name": "Delivery",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
@@ -8,15 +8,16 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.jpg",
+      "src": "logo.jpeg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "logo.jpg",
+      "src": "logo.jpeg",
       "sizes": "512x512",
-      "type": "image/jpg"
+      "type": "image/jpeg"
     }
   ]
 }
+
 
